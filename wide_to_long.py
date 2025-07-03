@@ -21,19 +21,23 @@ def wide_to_long(input_csv, output_csv=None):
             for rtype in row:
                 if rtype.lower() == 'domain':
                     continue
-                target = row[rtype].strip()
-                if target:
-                    writer.writerow({
-                        'domain': domain,
-                        'record_type': rtype.upper(),
-                        'target': target
-                    })
+                targets = row[rtype].strip()
+                if targets:
+                    # Split on both ';' and ',' — simple unified split
+                    for target in targets.replace(',', ';').split(';'):
+                        target = target.strip()
+                        if target:
+                            writer.writerow({
+                                'domain': domain,
+                                'record_type': rtype.upper(),
+                                'target': target
+                            })
 
     print(f"✅ Converted: {input_csv} → {output_csv}")
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert wide DNS CSV (one row per domain) to long form (one row per record)."
+        description="Convert wide DNS CSV (one row per domain) to long form (one row per record), splitting multiple targets."
     )
     parser.add_argument("input_csv", help="Input wide CSV file")
     parser.add_argument("output_csv", nargs="?", help="Output long CSV file (optional)")
